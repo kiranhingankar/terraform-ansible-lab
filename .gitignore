@@ -1,0 +1,8 @@
+cat > .gitignore <<EOF
+*.retry
+*.pem
+*.key
+.terraform/
+*.tfstate
+*.tfstate.*
+EOF

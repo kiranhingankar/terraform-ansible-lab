@@ -1,0 +1,72 @@
+---
+- name: Demonstrate essential Ansible modules
+  hosts: all
+  become: true
+
+  tasks:
+
+    - name: Install packages (Ubuntu)
+      apt:
+        name:
+          - git
+          - curl
+          - wget
+          - tree
+        state: present
+        update_cache: true
+      when: ansible_os_family == "Debian"
+
+    - name: Install packages (RHEL)
+      yum:
+        name:
+          - git
+          - curl
+          - wget
+          - tree
+        state: present
+      when: ansible_os_family == "RedHat"
+
+    - name: Ensure nginx is running
+      service:
+        name: nginx
+        state: started
+        enabled: true
+      ignore_errors: true
+
+    - name: Copy application configuration
+      copy:
+        src: files/app.conf
+        dest: /etc/app.conf
+        owner: root
+        group: root
+        mode: '0644'
+
+    - name: Create application directory
+      file:
+        path: /opt/myapp
+        state: directory
+        owner: root
+        group: root
+        mode: '0755'
+
+    - name: Check disk usage
+      command: df -h
+      register: disk_output
+
+    - name: Show disk usage
+      debug:
+        var: disk_output.stdout_lines
+
+    - name: Count running processes
+      shell: ps aux | wc -l
+      register: process_count
+
+    - name: Display process count
+      debug:
+        msg: "Total processes: {{ process_count.stdout }}"
+
+    - name: Set timezone variable
+      lineinfile:
+        path: /etc/environment
+        line: 'TZ=Asia/Kolkata'
+        create: true

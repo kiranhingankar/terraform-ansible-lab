@@ -1,0 +1,32 @@
+
+---
+- name: Conditional Demo
+  hosts: all
+  become: true
+
+  tasks:
+
+    - name: Install Nginx on web servers
+      package:
+        name: nginx
+        state: present
+      when: "'web' in group_names"
+
+    - name: Install MySQL on database servers
+      package:
+        name: mariadb105-server
+        state: present
+      when: "'db' in group_names"
+
+    - name: Ubuntu Check
+      debug:
+        msg: "This host in Ubuntu"
+      when: ansible_facts['distribution'] == "Ubuntu"
+
+    - name: Production Settings
+      debug:
+        msg: "Applying production settings"
+      when:
+        - "'web' in group_names"
+        - ansible_facts['memtotal_mb'] >= 512
+        - app_env == "production"

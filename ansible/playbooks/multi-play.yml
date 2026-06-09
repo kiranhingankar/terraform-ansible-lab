@@ -1,0 +1,73 @@
+---
+- name: Configure Web Servers
+  hosts: web
+  become: true
+
+  tasks:
+
+    - name: Install Nginx (Ubuntu)
+      apt:
+        name: nginx
+        state: present
+        update_cache: true
+      when: ansible_os_family == "Debian"
+
+    - name: Install Nginx (RHEL)
+      yum:
+        name: nginx
+        state: present
+      when: ansible_os_family == "RedHat"
+
+    - name: Start Nginx
+      service:
+        name: nginx
+        state: started
+        enabled: true
+
+---
+
+- name: Configure App Servers
+  hosts: app
+  become: true
+
+  tasks:
+
+    - name: Install build dependencies
+      package:
+        name:
+          - gcc
+          - make
+        state: present
+
+    - name: Create application directory
+      file:
+        path: /opt/app
+        state: directory
+        mode: '0755'
+
+---
+
+- name: Configure Database Servers
+  hosts: db
+  become: true
+
+  tasks:
+
+    - name: Install MySQL client (Ubuntu)
+      apt:
+        name: mysql-client
+        state: present
+        update_cache: true
+      when: ansible_os_family == "Debian"
+
+    - name: Install MySQL client (RHEL)
+      yum:
+        name: mysql
+        state: present
+      when: ansible_os_family == "RedHat"
+
+    - name: Create application data directory
+      file:
+        path: /var/lib/appdata
+        state: directory
+        mode: '0700'

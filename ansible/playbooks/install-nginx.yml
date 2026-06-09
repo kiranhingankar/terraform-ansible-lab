@@ -1,0 +1,30 @@
+---
+- name: Install and start Nginx on web servers
+  hosts: web
+  become: true
+
+  tasks:
+
+    - name: Install Nginx on Ubuntu
+      apt:
+        name: nginx
+        state: present
+        update_cache: true
+      when: ansible_os_family == "Debian"
+
+    - name: Install Nginx on Amazon Linux/RHEL
+      yum:
+        name: nginx
+        state: present
+      when: ansible_os_family == "RedHat"
+
+    - name: Start and enable Nginx
+      service:
+        name: nginx
+        state: started
+        enabled: true
+
+    - name: Create custom index page
+      copy:
+        content: "<h1>Deployed by Ansible - TerraWeek Server</h1>"
+        dest: /var/www/html/index.html
